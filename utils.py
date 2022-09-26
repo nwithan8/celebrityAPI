@@ -130,3 +130,8 @@ def years_from_now(years: int) -> datetime:
 
 def yyyy_mm_dd(date: datetime) -> str:
     return date.strftime("%Y-%m-%d")
+
+
+def clean_date_string(date_string: str, date_format: str = "%Y-%m-%d") -> str:
+    datetime_date = datetime.strptime(date_string, date_format)
+    return yyyy_mm_dd(datetime_date)

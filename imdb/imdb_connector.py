@@ -6,7 +6,7 @@ from objectrest import get
 from datetime import datetime
 
 from imdb.celebrity import CelebrityBrief, make_celebrity_brief_from_list_entry, Celebrity
-from utils import yyyy_mm_dd, today
+from utils import yyyy_mm_dd, today, clean_date_string
 
 
 async def _get_all_imdb_list_items(url: str, params: dict) -> List[BeautifulSoup]:
@@ -59,11 +59,12 @@ async def get_celebrity_details(imdb_id: str) -> Celebrity:
     name: str = soup.find_all("span", {"class": "itemprop"})[0].text.strip()
 
     # Position
-    celebrity_details["position"]: str = soup.find_all("span", {"class": "itemprop"})[1].text.strip()
+    celebrity_details["type"]: str = soup.find_all("span", {"class": "itemprop"})[1].text.strip()
 
     # Birth date
     try:
         birth_date: Union[str, None] = soup.find("div", {"id": "name-born-info"}).find("time")["datetime"].strip()
+        birth_date = clean_date_string(date_string=birth_date)
     except:
         birth_date: Union[str, None] = None
     celebrity_details["birth_date"]: Union[str, None] = birth_date
@@ -71,6 +72,7 @@ async def get_celebrity_details(imdb_id: str) -> Celebrity:
     # Death date
     try:
         death_date: Union[str, None] = soup.find("div", {"id": "name-death-info"}).find("time")["datetime"].strip()
+        death_date = clean_date_string(date_string=death_date)
     except:
         death_date: Union[str, None] = None
     celebrity_details["death_date"]: Union[str, None] = death_date
