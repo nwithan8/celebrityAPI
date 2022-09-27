@@ -1,7 +1,7 @@
 import json
 
 
-class ImdbObject:
+class BaseObject:
     def __init__(self):
         pass
 

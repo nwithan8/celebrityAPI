@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 from objectrest import get
 from datetime import datetime
 
-from imdb.celebrity import CelebrityBrief, make_celebrity_brief_from_list_entry, Celebrity
+from models.celebrity import CelebrityBrief, Celebrity
+from connectors import tmdb_person_id_from_imdb_id
 from utils import yyyy_mm_dd, today, clean_date_string
 
 
@@ -26,6 +27,13 @@ async def _get_all_imdb_list_items(url: str, params: dict) -> List[BeautifulSoup
     return items
 
 
+def make_celebrity_brief_from_imdb_list_entry(celebrity: BeautifulSoup) -> CelebrityBrief:
+    imdb_id: str = celebrity.find("a").get("href").split("/")[2].strip()
+    name: str = celebrity.find("a").text.strip()
+
+    return CelebrityBrief(imdb_id=imdb_id, name=name)
+
+
 async def get_celebrity_deaths(start_date: datetime, end_date: datetime = None, single_day: bool = False) \
         -> Union[List[CelebrityBrief], None]:
     end_date = end_date if end_date else (start_date if single_day else today())
@@ -43,12 +51,12 @@ async def get_celebrity_deaths(start_date: datetime, end_date: datetime = None, 
     if len(items) == 0:
         return None
 
-    celebrities: List[CelebrityBrief] = [make_celebrity_brief_from_list_entry(item) for item in items]
+    celebrities: List[CelebrityBrief] = [make_celebrity_brief_from_imdb_list_entry(item) for item in items]
 
     return celebrities
 
 
-async def get_celebrity_details(imdb_id: str) -> Celebrity:
+async def get_celebrity_details(imdb_id: str, tmdb_api_key: str) -> Celebrity:
     url: str = f"https://www.imdb.com/name/{imdb_id}/"
     response: requests.Response = get(url=url)
     soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
@@ -76,5 +84,9 @@ async def get_celebrity_details(imdb_id: str) -> Celebrity:
     except:
         death_date: Union[str, None] = None
     celebrity_details["death_date"]: Union[str, None] = death_date
+
+    # TMDB ID
+    tmdb_id: str = tmdb_person_id_from_imdb_id(imdb_id=imdb_id, tmdb_api_key=tmdb_api_key)
+    celebrity_details["tmdb_id"]: Union[str, None] = tmdb_id
 
     return Celebrity(imdb_id=imdb_id, name=name, **celebrity_details)
