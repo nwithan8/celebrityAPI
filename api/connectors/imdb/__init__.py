@@ -1,0 +1,1 @@
+from api.connectors.imdb.imdb_connector import get_celebrity_deaths, get_celebrity_details

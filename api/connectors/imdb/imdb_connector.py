@@ -6,8 +6,8 @@ from objectrest import get
 from datetime import datetime
 
 from models.celebrity import CelebrityBrief, Celebrity
-from connectors import tmdb_person_id_from_imdb_id
-from utils import yyyy_mm_dd, today, clean_date_string
+from api.connectors import tmdb_person_id_from_imdb_id
+from utils.dates import yyyy_mm_dd, today, clean_date_string
 
 
 async def _get_all_imdb_list_items(url: str, params: dict) -> List[BeautifulSoup]:
